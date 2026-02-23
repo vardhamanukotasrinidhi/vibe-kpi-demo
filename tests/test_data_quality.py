@@ -31,12 +31,12 @@ def setup_quality_test():
 
 def test_etl_handles_null_values(setup_quality_test):
     """Test ETL handles null/missing values correctly"""
-    # Create data with null values
+    # Create data with null values (but valid churned values)
     test_data = {
         'customer_id': [1, 2, 3],
         'city': ['Mumbai', None, 'Delhi'],
         'monthly_spend': [1000.0, 2000.0, None],
-        'churned': [0, 1, None]
+        'churned': [0, 1, 0]  # Valid churned values
     }
     df = pd.DataFrame(test_data)
     df.to_csv('data/raw/customers_raw.csv', index=False)

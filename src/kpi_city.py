@@ -1,4 +1,9 @@
 import sqlite3
+# Add at top
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def city_kpi(city: str) -> dict:
     """Calculate KPI for a specific city using parameterized SQL"""
@@ -9,7 +14,12 @@ def city_kpi(city: str) -> dict:
         raise ValueError("City name cannot be empty or whitespace")
     
     try:
-        with sqlite3.connect('data/db/analytics.db') as conn:
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from config import ANALYTICS_DB_PATH
+        
+        with sqlite3.connect(str(ANALYTICS_DB_PATH)) as conn:
             cursor = conn.cursor()
             
             # Parameterized query to prevent SQL injection
@@ -36,20 +46,24 @@ def city_kpi(city: str) -> dict:
                     'churn_rate_pct': float(churn_rate)
                 }
                 
-                print(f"KPI for {city.strip()}:")
-                print(f"  Total Customers: {total}")
-                print(f"  Average Monthly Spend: ${avg_spend:.2f}")
-                print(f"  Churned Customers: {churned}")
-                print(f"  Churn Rate: {churn_rate}%")
+                logger.info(f"KPI for {city.strip()}:")
+                logger.info(f"  Total Customers: {total}")
+                logger.info(f"  Average Monthly Spend: ${avg_spend:.2f}")
+                logger.info(f"  Churned Customers: {churned}")
+                logger.info(f"  Churn Rate: {churn_rate}%")
                 
                 return kpi_data
             else:
-                print(f"No data found for city: {city}")
-                return {'city': city.strip(), 'error': 'No data found'}
+                logger.info(f"No data found for city: {city}")
+                return create_error_response(city, 'No data found')
                 
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return {'city': city.strip(), 'error': f'Database error: {e}'}
+        logger.error(f"Database error: {e}")
+        return create_error_response(city, f'Database error: {e}')
+
+def create_error_response(city: str, error_msg: str) -> dict:
+    """Create standardized error response"""
+    return {'city': city.strip(), 'error': error_msg, 'success': False}
 
 if __name__ == "__main__":
     # Normal call

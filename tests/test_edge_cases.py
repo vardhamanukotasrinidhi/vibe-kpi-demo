@@ -39,7 +39,7 @@ def setup_test_db():
 
 def test_city_kpi_empty_city(setup_test_db):
     """Test KPI function with empty city name"""
-    with pytest.raises(ValueError, match="City name cannot be empty"):
+    with pytest.raises(ValueError, match="City name must be a non-empty string"):
         city_kpi("")
 
 def test_city_kpi_whitespace_city(setup_test_db):
